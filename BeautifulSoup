@@ -1,0 +1,40 @@
+import bs4
+from bs4 import BeautifulSoup
+import requests
+#Versiones
+print('versión de BeautifulSoup:', bs4.__version__)
+print('versión de requests: ', requests.__version__)
+
+# 1. HTML
+URL = 'https://scrapepark.org/spanish/'
+pedido_obtenido = requests.get(URL)
+html_obtenido = pedido_obtenido.text
+
+# 2. Parsear
+soup = BeautifulSoup(html_obtenido, 'html.parser')
+
+primer_h2 = soup.find('h2')
+print(f'el primer h2 es: {primer_h2}')
+
+# Método find_all ( )
+h2_todos = soup.find_all('h2')
+print(f'Todas las h2: {h2_todos}')
+
+# Iteración sobre el objeto
+for seccion in h2_todos:
+    print(f'texto de las etiquetas:  {seccion.text}')
+
+# Todas las etiquetas que tengan el atributo 'src'
+src_todos = soup.find_all(src=True)
+for elemento in src_todos:
+    if elemento['src'].endswith('.jpg'):
+        print(f'etiquetas que cumplen la condición:  {elemento}')
+
+# Bajar las imágenes de la página web
+URL_imagenes = []
+for i, imagen in enumerate(src_todos):
+    if imagen['src'].endswith('png'):
+        print(imagen['src'])
+        r = requests.get(f"https://scrapepark.org/{imagen['src']}")
+        with open(f"imagen_{i}.png", 'wb') as f:
+            f.write(r.content)
