@@ -1,0 +1,48 @@
+Bitácora proyecto 2
+El proyecto tuvo como objetivo automatizar la recolección de información académica (URLs, correos electrónicos y códigos ORCID) desde páginas web de revistas científicas.
+Para lograrlo, se implementaron tres scripts en Python que utilizan la herramienta Selenium para navegar de forma automática y extraer datos relevantes.
+Etapas del proyecto:
+1.	Extracción de URLs (WS_URLs.py)
+Objetivo: obtener los enlaces directos a los archivos PDF de cada artículo.
+Actividades realizadas:
+•	Se cargó un archivo CSV con las URLs principales de los artículos.
+•	Se configuró Selenium en modo “headless” para trabajar sin abrir el navegador.
+•	El script recorrió cada página y localizó los enlaces de descarga de PDFs.
+•	Los enlaces encontrados se guardaron en un archivo llamado PDFS_CORREOS2.csv.
+Resultado:
+Se generó correctamente el listado de enlaces de archivos PDF de los artículos.
+2.	Extracción de correos electrónicos (WS_Correos.py)
+Objetivo: identificar direcciones de correo dentro del contenido de los artículos.
+Actividades realizadas:
+•	Se leyó el archivo PDFS_CORREOS2.csv.
+•	El programa abrió los PDFs incrustados en páginas web.
+•	Se buscaron patrones de texto con “@” usando expresiones regulares.
+•	Los correos válidos fueron almacenados en un archivo CSV.
+Resultado:
+Se detectaron correos electrónicos de autores y se generó un listado limpio.
+3.	Extracción de ORCIDs (WS_Correos_Orcid.py)
+Objetivo: obtener los identificadores ORCID de los autores de los artículos.
+Actividades realizadas:
+•	Se cargó el archivo AUTHORS_master.csv con URLs de artículos.
+•	Cada página fue abierta en un hilo diferente para acelerar el proceso.
+•	El programa buscó enlaces que contuvieran “orcid.org”.
+•	Se almacenaron todas las claves encontradas en ClavesOrcid.csv.
+Resultado:
+Se obtuvieron múltiples claves ORCID de autores, reduciendo significativamente el tiempo de búsqueda gracias al uso de hilos (multithreading).
+Dificultades
+•	Tardaba demasiado en cargar los PDFs.
+•	No se detectaban algunos ORCIDs o correos electronicos
+•	Se presentaron errores de indentación
+•	Las rutas de archivos variaban según el equipo, lo que requería corrección manual.
+Conclusiones
+El uso de Selenium permitió automatizar procesos que manualmente habrían tomado mucho tiempo. Se comprobó la importancia de utilizar pausas y manejo de excepciones al trabajar con contenido dinámico. El proyecto cumplió exitosamente con la extracción de información (URLs, correos y ORCIDs). La experiencia fortaleció las habilidades en web scraping, manejo de datos y programación concurrente.
+
+Autoría
+Proyecto realizado por: Omar Reyna, Mariana Verdugo, Juan Carlos Leyva, Dulce Vega
+Materia: Proyecto Empresarisl 1
+Universidad Autónoma de Occidente (UAdeO)
+Fecha: Octubre de 2025
+
+
+
+
