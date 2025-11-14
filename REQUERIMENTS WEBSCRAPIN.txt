@@ -1,0 +1,15 @@
+REQUERIMENTS WEBSCRAPIN_PDFs.py
+pandas==2.3.3
+selenium==4.38.0
+
+REQUERIMENTS WS_Correos.py
+pandas==2.3.3
+selenium==4.38.0
+request==2.32.5
+PyMuPDF== 1.26.5
+
+
+
+REQUERIMENTS WS_Correros_Orcid.py
+beautifulsoup==4.12.4
+selenium==4.38.0
