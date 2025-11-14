@@ -1,0 +1,132 @@
+
+
+
+# Desactivar advertencias por conexiones inseguras (sin certificados)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Definir cabeceras HTTP para simular un navegador real
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/140.0.0.0 Safari/537.36",
+    # "Referer": url  # Se puede usar si se requiere referencia de origen
+}
+
+# Configurar opciones del navegador Chrome
+chrome_options = Options()
+chrome_options.add_argument("--headless=new")  # Ejecutar sin interfaz gráfica
+chrome_options.add_argument("--disable-gpu")   # Evitar uso de GPU en Windows
+chrome_options.add_argument("--no-sandbox")    # Recomendado en Linux
+chrome_options.add_argument("--window-size=1920,1080")  # Tamaño de ventana virtual
+
+# Lista para almacenar resultados de todos los hilos
+resultados_totales = []
+
+# Crear un candado para proteger acceso concurrente a la lista
+lock = threading.Lock()
+
+def scrape_pdf(url):
+    """
+    Abre una página con Selenium, realiza scroll hasta el final, 
+    busca enlaces PDF y los guarda en una lista compartida.
+
+    Parámetros:
+        url (str): Dirección web del artículo a procesar.
+
+    Retorna:
+        None (los resultados se guardan en la lista global 'resultados_totales').
+    """
+    # Inicializar el navegador en modo headless
+    driver = webdriver.Chrome(chrome_options)
+
+    # Lista local de enlaces PDF encontrados
+    links = []
+
+    # Abrir la URL
+    driver.get(url)
+    print(f"Hilo {threading.current_thread().name} abriendo: {url}")
+
+    # Esperar para permitir carga completa de la página
+    time.sleep(20)
+    scrolldown = driver.execute_script(
+        "window.scrollTo(0, document.body.scrollHeight);"
+        "var scrolldown=document.body.scrollHeight;return scrolldown;"
+    )
+
+    match = False
+    while (match == False):
+        last_count = scrolldown
+        time.sleep(5)
+        scrolldown = driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);"
+            "var scrolldown=document.body.scrollHeight;return scrolldown;"
+        )
+        if last_count == scrolldown:
+            match = True  # Se alcanzó el final de la página
+
+    # Esperar un poco antes de buscar los enlaces
+    time.sleep(5)
+
+    # Buscar enlaces que contengan "download" o terminen con ".pdf"
+    pdfs = driver.find_elements(
+        "xpath",
+        "//a[contains(@href, 'download') or contains(@href, '.pdf')]"
+    )
+
+    # Extraer los atributos href (enlaces)
+    for pdf in pdfs:
+        p = pdf.get_attribute('href')
+        if p:
+            links.append(p)
+
+    # Cerrar el navegador
+    driver.quit()
+    print(f"Hilo {threading.current_thread().name} finalizado.")
+
+    # Guardar los resultados en la lista global de forma segura
+    with lock:
+        for p in links:
+            resultados_totales.append({"url_origen": url, "pdf_encontrado": p})
+
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+if __name__ == "__main__":
+    # Crear un grupo de hilos con máximo 4 procesos concurrentes
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        # Asignar una tarea (scrape_pdf) por cada URL
+        futures = {executor.submit(scrape_pdf, url): url for url in prueba}
+
+        # Esperar resultados e identificar errores
+        for future in as_completed(futures):
+            url = futures[future]
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error en {url}: {e}")
+
+    # Mostrar todos los PDFs encontrados
+    print("\nTodos los PDFs encontrados:")
+    for r in resultados_totales:
+        print(r)
+
+os.chdir(r"C:\Users\122215\OneDrive\Documentos\UAdeO\SEMESTRE 3\PE\WebScraping_Revistas-main")
+
+# Crear DataFrame con los resultados
+df_pdfs = pd.DataFrame(resultados_totales)
+
+# Imprimir para verificar
+print(df_pdfs)
+
+# Guardar en un archivo CSV (modo “a” = agregar al final)
+df_pdfs.to_csv('PDFS_CORREOS2.csv', mode="a", header=False, index=True)
+
+# === AGREGADO SOLO PARA ASEGURAR QUE SE GUARDE CORRECTAMENTE ===
+# Verificar si el DataFrame tiene datos antes de guardar
+if not df_pdfs.empty:
+    salida = os.path.join(os.getcwd(), "PDFS_CORREOS2.csv")
+    df_pdfs.to_csv(salida, mode="a", header=False, index=False, encoding="utf-8-sig")
+    print(f"\nArchivo CSV guardado correctamente en:\n{salida}")
+else:
+    print("\nNo se encontraron PDFs para guardar en el CSV.")
+# ===============================================================
