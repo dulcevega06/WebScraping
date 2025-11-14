@@ -1,0 +1,41 @@
+#Proyecto: Extracción de URLs, Correos y ORCIDs 
+Este proyecto realiza un proceso para obtener información de artículos académicos o científicos desde páginas web.  
+Se divide en tres etapas principales, cada una manejada por un archivo Python diferente.
+ Archivos del proyecto
+WS_URLs.py — Extracción de URLs de archivos PDF  
+Este script abre una lista de enlaces a artículos y extrae los enlaces directos a los archivos PDF
+Qué hace:
+- Carga un archivo CSV con las URLs de los artículos.  
+- Abre cada página usando Selenium (modo sin ventana o “headless”).  
+- Busca los enlaces a los PDF de los artículos.  
+- Guarda los enlaces encontrados en un archivo nuevo llamado PDFS_CORREOS2.csv.
+2. WS_Correos.py — Extracción de correos electrónicos desde los PDFs  
+Este script utiliza las URLs de los PDFs guardadas anteriormente para **buscar correos electrónicos** dentro de los documentos.
+Qué hace:
+- Lee el archivo PDFS_CORREOS2.csv.  
+- Abre los PDFs incrustados en las páginas web.  
+- Escanea el contenido y detecta cualquier texto con formato de correo electrónico.  
+- Guarda los correos encontrados en un archivo CSV.
+3. WS_Correos_Orcid.py — Extracción de ORCIDs (identificadores de autores)  
+Este script busca los códigos ORCID de los autores que aparecen en las páginas web de los artículos.
+
+Qué hace:
+- Carga un archivo CSV con las URLs de los artículos (`AUTHORS_master.csv`).  
+- Abre las páginas y busca enlaces que contengan `orcid.org`.  
+- Usa varios hilos para trabajar más rápido (procesa varias páginas a la vez).  
+- Guarda todas las claves ORCID encontradas en un archivo llamado ClavesOrcid.csv.
+Archivos generados
+PDFS_CORREOS2.csv:  Enlaces a los archivos PDF extraídos. |
+ClavesOrcid.csv:  Lista de identificadores ORCID encontrados. 
+
+ Recomendaciones y buenas prácticas
+
+-No modificar las rutas (C:\Users\...) sin asegurarte de que los archivos existan ahí.  
+- Esperar a que el proceso termine: algunos sitios tardan en cargar, por eso hay pausas en el código.  
+- Si un hilo se detiene, el programa seguirá con los demás (gracias a try-except).  
+Créditos
+Proyecto desarrollado con fines académicos para la asignatura de Proyecto Empresarial 1.  
+Autoría: Omar Reyna, Mariana Verdugo, Juan Carlos Leyva
+Universidad Autónoma de Occidente (UAdeO).
+
+
